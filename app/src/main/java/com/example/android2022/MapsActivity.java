@@ -1,21 +1,32 @@
 package com.example.android2022;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
+import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import android.widget.Toast;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.Geofence;
+import com.google.android.gms.location.GeofencingClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.example.android2022.databinding.ActivityMapsBinding;
 import com.google.android.gms.tasks.OnSuccessListener;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
 
@@ -23,12 +34,22 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private FusedLocationProviderClient fusedLocationClient ;
     private ActivityMapsBinding binding;
 
+    // Geofencing
+    private int GEOFENCE_RADIUS = 100;
+    private GeofencingClient geofencingClient;
+    private List newGeofenceList = new ArrayList();
+
+    // Buttons
+    private Button startButton;
+    private Button cancelButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        //Initializing clients
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        geofencingClient = LocationServices.getGeofencingClient(this);
 
         binding = ActivityMapsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
@@ -37,7 +58,37 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        // Geofencing
+        geofencingClient = LocationServices.getGeofencingClient(this);
+
+
+        //Button Logic
+
+        cancelButton = findViewById(R.id.cancel);
+        cancelButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v)
+            {
+                cancelButtonLogic();
+            }
+
+        });
+
+        startButton = findViewById(R.id.start);
+        startButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v)
+            {
+                startButtonLogic();
+            }
+        });
+        // Long click listener
+        //        View mapView = findViewById(R.id.map);
+        //        mapView.setOnLongClickListener(new GoogleMap.OnMapLongClickListener());
     }
+
+
 
 
     /**
@@ -53,11 +104,36 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        //Location impl
         mMap.setMyLocationEnabled(true);
         mMap.setMinZoomPreference(14.0f);
         mMap.setMaxZoomPreference(18.0f);
 
         getLastLocationMethod();
+
+        // add listener
+        mMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
+            @Override
+            public void onMapLongClick(@NonNull LatLng latLng) {
+                Toast.makeText(MapsActivity.this, "Long Click!", Toast.LENGTH_SHORT).show();
+                //TODO: > create a geofence with radius 100m
+                newGeofenceList.add(new Geofence.Builder()
+                        // Set the request ID of the geofence. This is a string to identify this
+                        // geofence.
+//                        .setRequestId(String.valueOf(geofenceList.size()+1))
+                        .setRequestId(latLng.toString())
+                        .setCircularRegion(
+                                latLng.latitude,
+                                latLng.longitude,
+                                GEOFENCE_RADIUS
+                        )
+                        .setExpirationDuration(Geofence.NEVER_EXPIRE)
+                        .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER |
+                                Geofence.GEOFENCE_TRANSITION_EXIT)
+                        .build());
+                drawCircle(latLng);
+            }
+        });
 
         // TODO: add comments here My code
 //        LocationManager mLocationMan = (LocationManager) getSystemService(LOCATION_SERVICE);
@@ -107,4 +183,40 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 });
 
     }
+
+    //Drawing fences
+    private void drawCircle(LatLng point){
+
+        // Instantiating CircleOptions to draw a circle around the marker
+        CircleOptions circleOptions = new CircleOptions();
+
+        // Specifying the center of the circle
+        circleOptions.center(point);
+
+        // Radius of the circle
+        circleOptions.radius(GEOFENCE_RADIUS);
+
+        // Border color of the circle
+        circleOptions.strokeColor(Color.BLACK);
+
+        // Fill color of the circle
+        circleOptions.fillColor(0x30ff0000);
+
+        // Border width of the circle
+        circleOptions.strokeWidth(2);
+
+        // Adding the circle to the GoogleMap
+        mMap.addCircle(circleOptions);
+
+    }
+
+    // Adding button logic
+    private void startButtonLogic() {
+    }
+
+    // Remove all newly created geofences
+    private void cancelButtonLogic() {
+//        newGeofenceList.removeAll();
+    }
+
 }
