@@ -37,7 +37,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     // Geofencing
     private int GEOFENCE_RADIUS = 100;
     private GeofencingClient geofencingClient;
-    private List newGeofenceList = new ArrayList();
+    private List<LatLng> tempList = new ArrayList<LatLng>();
+    private ArrayList newGeofenceList = new ArrayList();
 
     // Buttons
     private Button startButton;
@@ -117,20 +118,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             public void onMapLongClick(@NonNull LatLng latLng) {
                 Toast.makeText(MapsActivity.this, "Long Click!", Toast.LENGTH_SHORT).show();
                 //TODO: > create a geofence with radius 100m
-                newGeofenceList.add(new Geofence.Builder()
-                        // Set the request ID of the geofence. This is a string to identify this
-                        // geofence.
-//                        .setRequestId(String.valueOf(geofenceList.size()+1))
-                        .setRequestId(latLng.toString())
-                        .setCircularRegion(
-                                latLng.latitude,
-                                latLng.longitude,
-                                GEOFENCE_RADIUS
-                        )
-                        .setExpirationDuration(Geofence.NEVER_EXPIRE)
-                        .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER |
-                                Geofence.GEOFENCE_TRANSITION_EXIT)
-                        .build());
+                tempList.add(latLng);
                 drawCircle(latLng);
             }
         });
@@ -211,11 +199,31 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     // Adding button logic
+    @SuppressLint("NewApi")
     private void startButtonLogic() {
+
+        // add the temp list to geofences list
+        for (LatLng latLng : tempList) {
+            newGeofenceList.add(new Geofence.Builder()
+                .setRequestId(latLng.toString())
+                .setCircularRegion(
+                        latLng.latitude,
+                        latLng.longitude,
+                        GEOFENCE_RADIUS
+                )
+                .setExpirationDuration(Geofence.NEVER_EXPIRE)
+                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER |
+                        Geofence.GEOFENCE_TRANSITION_EXIT)
+                .build());
+        }
+
     }
 
     // Remove all newly created geofences
     private void cancelButtonLogic() {
+
+        // TODO: check if this performs as it should
+        finish();
 //        newGeofenceList.removeAll();
     }
 
