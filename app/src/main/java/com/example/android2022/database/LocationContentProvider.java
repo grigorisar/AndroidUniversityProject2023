@@ -40,9 +40,10 @@ public class LocationContentProvider extends ContentProvider {
     static final int uriCodeFence = 1;
     static final int uriCodeTraversal = 2;
     static UriMatcher uriMatcher;
-    final ContentResolver resolver = getContext().getContentResolver();
+    static ContentResolver resolver;
     private static HashMap<String, String> values;
-    DbHelper helper = new DbHelper(getContext());
+    static DbHelper helper;
+    static SQLiteDatabase database;
 
     static {
         // to match the content URI
@@ -77,16 +78,18 @@ public class LocationContentProvider extends ContentProvider {
 //        return cursor;
 //    }
 
-    public ArrayList getLastSessionFences (){
+    public ArrayList getLastSessionFences(){
 
         //TODO: Implement this to get the geofences of the last session
 
+        String sessionId = getLastSession();
+        if (sessionId == null) { return null;}
         // select DbLocation.TIMESTAMP_COL from DbLocation.TABLE_FENCE WHERE DbLocation.TIMESTAMP_COL=getLastSession() ;
         ArrayList fences = new ArrayList();
         Cursor c = query(FENCE_URI,
                 null,
-                DbLocation.TIMESTAMP_COL + " = ?",
-                new String[]{getLastSession()},
+                DbLocation.SESSION_ID + " = ?",
+                new String[]{sessionId},
                 null);
 
         while(c.moveToNext()){
@@ -106,8 +109,12 @@ public class LocationContentProvider extends ContentProvider {
     }
 
 
-    public ArrayList<TraversalModel> getTraversals(String sessionId) {
+    public ArrayList<TraversalModel> getTraversals() {
         ArrayList<TraversalModel> travs = new ArrayList<>();
+        String sessionId = getLastSession();
+        if (sessionId == null) {
+            return null;
+        }
         Cursor c = query(
                 TRAVERSAL_URI,
                 null,
@@ -135,16 +142,20 @@ public class LocationContentProvider extends ContentProvider {
 //        // Moves the user's input string to the selection arguments.
 //        selectionArgs[0] = searchString;
 //
-        Cursor cursor = query(
-                FENCE_URI,
-                new String[]{"max("+DbLocation.TIMESTAMP_COL+")"},
-                null,
-                null,
-                null,
-                null);
-        if(cursor!= null){
-            cursor.moveToFirst();
-            return  cursor.getString(0);
+        try {
+            Cursor cursor = query(
+                    FENCE_URI,
+                    new String[]{"max("+DbLocation.SESSION_ID+")"},
+                    null,
+                    null,
+                    null,
+                    null);
+            if(cursor!= null){
+                cursor.moveToFirst();
+                return  cursor.getString(0);
+            }
+        }catch (Error e){
+            return null;
         }
         return null;
     }
@@ -153,6 +164,10 @@ public class LocationContentProvider extends ContentProvider {
     public boolean onCreate() {
         // TODO: Implement this to initialize your content provider on startup.
 //        getContext().getContentResolver();
+        helper = new DbHelper(getContext());
+        resolver = getContext().getContentResolver();
+        database = helper.getReadableDatabase();
+
         return false;
     }
 
@@ -163,15 +178,17 @@ public class LocationContentProvider extends ContentProvider {
                         @Nullable String selection,  // WHERE clause
                         @Nullable String[] selectionArgs, // WHERE clause value substitution
                         @Nullable String sortOrder) {
-        SQLiteDatabase database = helper.getReadableDatabase();
         Cursor cursor = null;
+        String table= DbLocation.TABLE_FENCE;
         switch(uriMatcher.match(uri)){
             //Select * from LOCATIONS
             case uriCodeFence:
 //                cursor = database.query(uri.getPath(),projection,selection,selectionArgs,null,null,null);
 //                sortOrder = DbLocation.FENCE_ID + " DESC";
+                table = DbLocation.TABLE_FENCE;
                 break; //Select * from LOCATIONS
             case uriCodeTraversal:
+                table = DbLocation.TABLE_TRAVERSAL;
 //                sortOrder = DbLocation.TIMESTAMP_COL + " DESC";
 //                cursor = database.query(uri.getPath(),projection,selection,selectionArgs,null,null,null);
                 break;
@@ -180,7 +197,11 @@ public class LocationContentProvider extends ContentProvider {
         }
 //        cursor = database.query(uri.getPath(),projection,selection,selectionArgs,null,null,sortOrder);
         //TODO: check if uri matches table
-        cursor = database.query(uri.getPath(),projection,selection,selectionArgs,null,null,sortOrder);
+        try{
+            cursor = database.query(table,projection,selection,selectionArgs,null,null,sortOrder);
+        }catch (Error e){
+            return null;
+        }
         //TODO: Add null handling
         return cursor;
     }
@@ -209,17 +230,17 @@ public class LocationContentProvider extends ContentProvider {
 
     @Override
     public Uri insert(Uri uri, ContentValues values) {
-        Uri insertedItemUri = resolver.insert(uri,values); //may be null
-        return insertedItemUri;
-//        throw new UnsupportedOperationException("Not yet implemented");
+//        Uri insertedItemUri = resolver.insert(uri,values); //may be null
+//        return insertedItemUri;
+        throw new UnsupportedOperationException("Not yet implemented");
     }
 
     @Override
     public int update(Uri uri, ContentValues values, String selection,
                       String[] selectionArgs) {
-        int rowsAffected = resolver.update(uri,values,selection,selectionArgs);
-        return rowsAffected;
-//        throw new UnsupportedOperationException("Not yet implemented");
+//        int rowsAffected = resolver.update(uri,values,selection,selectionArgs);
+//        return rowsAffected;
+        throw new UnsupportedOperationException("Not yet implemented");
     }
 
 }

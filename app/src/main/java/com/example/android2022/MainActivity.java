@@ -43,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v)
             {
                 checkPermission(Manifest.permission.ACCESS_FINE_LOCATION, FINE_LOCATION_PERMISSION_CODE);
+                startActivity(new Intent(MainActivity.this,ResultMapsActivity.class));
             }
         });
 

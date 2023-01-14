@@ -1,14 +1,23 @@
 package com.example.android2022;
 
+import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentActivity;
 
+import android.Manifest;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.Toast;
 
 import com.example.android2022.database.DbLocation;
 import com.example.android2022.database.LocationContentProvider;
 import com.example.android2022.models.FenceModel;
 import com.example.android2022.models.TraversalModel;
+import com.example.android2022.utils.LocationService;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -24,6 +33,7 @@ public class ResultMapsActivity extends FragmentActivity implements OnMapReadyCa
     private int GEOFENCE_RADIUS = 100;
     private GoogleMap mMap;
     private ActivityResultMapsBinding binding;
+    private Button returnButton, pauseButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,6 +46,36 @@ public class ResultMapsActivity extends FragmentActivity implements OnMapReadyCa
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+
+        // Button Logic
+        returnButton = findViewById(R.id.toMenu);
+        returnButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {returnButtonLogic();}
+        });
+
+        pauseButton = findViewById(R.id.pause);
+        pauseButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v){pauseButtonLogic();}
+        });
+
+    }
+
+    private void returnButtonLogic() {
+        finish(); //return to main activity
+    }
+
+    private void pauseButtonLogic() {
+        // restart service
+        try {
+            stopService(new Intent(getBaseContext(), LocationService.class));
+        } catch (Error e){
+            Toast.makeText(this, "Error while stopping service", Toast.LENGTH_SHORT).show();
+            Log.e("LocationService", "pauseButtonLogic: Error", e);
+        }
+        startService(new Intent(getBaseContext(), LocationService.class));
     }
 
     /**
@@ -52,9 +92,20 @@ public class ResultMapsActivity extends FragmentActivity implements OnMapReadyCa
         mMap = googleMap;
 
         // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+
+        mMap.setMyLocationEnabled(true);
+        mMap.setMinZoomPreference(14.0f);
+        mMap.setMaxZoomPreference(18.0f);
 
         LocationContentProvider locationProvider = new LocationContentProvider();
         // get data from location provider
@@ -62,18 +113,20 @@ public class ResultMapsActivity extends FragmentActivity implements OnMapReadyCa
         drawFences(fences); // draw GeoFences on map
 
         // get data from location provider
-        ArrayList<TraversalModel> traversals = locationProvider.getTraversals(fences.get(0).getSessionId());
+        ArrayList<TraversalModel> traversals = locationProvider.getTraversals();
         drawTraversals(traversals); // draw Entry & Exit points on map
     }
 
     // GeoFences
     private void drawFences(ArrayList<FenceModel> fences){
+        if (fences == null) {
+            return;
+        }
         for (FenceModel f:fences) {
             drawFence(new LatLng(f.getLatitude(),f.getLongitude()));
         }
     }
     private void drawFence(LatLng point){
-
         // Instantiating CircleOptions to draw a circle around the marker
         CircleOptions circleOptions = new CircleOptions();
 
@@ -99,6 +152,9 @@ public class ResultMapsActivity extends FragmentActivity implements OnMapReadyCa
 
     // Traversals
     private void drawTraversals(ArrayList<TraversalModel> traversals){
+        if (traversals == null) {
+            return;
+        }
         for (TraversalModel t:traversals){
             drawTraversal(new LatLng(t.getLatitude(),t.getLongitude()),t.getAction());
         }

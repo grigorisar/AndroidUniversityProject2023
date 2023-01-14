@@ -32,7 +32,7 @@ public class DbLocation {
             + FENCE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
             + SESSION_ID +" TEXT,"
             + LAT_COL +" TEXT,"
-            + LON_COL +" TEXT,);";
+            + LON_COL +" TEXT);";
 
     static public String CREATE_TABLE_TRAVERSAL = "" +
             "CREATE TABLE "+TABLE_TRAVERSAL +" ("
@@ -41,5 +41,5 @@ public class DbLocation {
             + LAT_COL +" TEXT,"
             + LON_COL +" TEXT,"
             + TIMESTAMP_COL +" TEXT,"
-            + ACTION_COL +" TEXT,);";
+            + ACTION_COL +" TEXT);";
 }
