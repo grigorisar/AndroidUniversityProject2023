@@ -1,4 +1,4 @@
-package com.example.android2022;
+package com.example.android2022.utils;
 
 import android.Manifest;
 import android.app.Service;
@@ -17,7 +17,8 @@ import androidx.core.app.ActivityCompat;
 
 public class LocationService extends Service {
     public static final String BROADCAST_ACTION = "Observing Location :)";
-    private static final int FIVE_SECONDS = 1000 * 5 ;
+    private static final int minTime = 1000 * 5 ;// in millis
+    private static final int minDistance = 50 ; // in meters
     public LocationManager locationManager;
     public MyLocationListener listener;
     public Location previousBestLocation = null;
@@ -38,8 +39,8 @@ public class LocationService extends Service {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
-        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 4000, 0, (LocationListener) listener);
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 4000, 0, listener);
+        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, minTime, minDistance , (LocationListener) listener);
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, minTime, minDistance, (LocationListener) listener);
     }
 
     @Override
@@ -55,8 +56,8 @@ public class LocationService extends Service {
 
         // Check whether the new location fix is newer or older
         long timeDelta = location.getTime() - currentBestLocation.getTime();
-        boolean isSignificantlyNewer = timeDelta > FIVE_SECONDS;
-        boolean isSignificantlyOlder = timeDelta < -FIVE_SECONDS;
+        boolean isSignificantlyNewer = timeDelta > minTime;
+        boolean isSignificantlyOlder = timeDelta < -minTime;
         boolean isNewer = timeDelta > 0;
 
         // If it's been more than five seconds since the current location, use the new location
@@ -127,6 +128,7 @@ public class LocationService extends Service {
     public class MyLocationListener implements LocationListener {
 
         public void onLocationChanged(final Location loc) {
+
             Log.i("*****", "Location changed");
             //TODO: add criteria
             if (isBetterLocation(loc, previousBestLocation)) {

@@ -43,6 +43,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     // Buttons
     private Button startButton;
     private Button cancelButton;
+    private long sessionId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -199,9 +200,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     // Adding button logic
-    @SuppressLint("NewApi")
+//    @SuppressLint("NewApi")
     private void startButtonLogic() {
-
+        sessionId = System.currentTimeMillis() / 1000L;
         // add the temp list to geofences list
         for (LatLng latLng : tempList) {
             newGeofenceList.add(new Geofence.Builder()
