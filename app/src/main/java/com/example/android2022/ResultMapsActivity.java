@@ -13,18 +13,15 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
-import com.example.android2022.database.DbLocation;
 import com.example.android2022.database.LocationContentProvider;
 import com.example.android2022.models.FenceModel;
 import com.example.android2022.models.TraversalModel;
 import com.example.android2022.utils.LocationService;
-import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.example.android2022.databinding.ActivityResultMapsBinding;
 
 import java.util.ArrayList;
@@ -35,6 +32,9 @@ public class ResultMapsActivity extends FragmentActivity implements OnMapReadyCa
     private ActivityResultMapsBinding binding;
     private Button returnButton, pauseButton;
 
+    private LocationContentProvider provider;
+    private ArrayList<FenceModel> fences;
+    private ArrayList<TraversalModel> traversals;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -44,9 +44,14 @@ public class ResultMapsActivity extends FragmentActivity implements OnMapReadyCa
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
+                .findFragmentById(R.id.results_map);
         mapFragment.getMapAsync(this);
 
+
+        provider = new LocationContentProvider();
+        fences = provider.getLastSessionFences();
+        traversals = provider.getLastSessionTraversals();
+        Log.i("Traversals", "Traversal matches fence SessionID "+ traversals.get(0).getSessionId().equals(fences.get(0).getSessionId()));
 
         // Button Logic
         returnButton = findViewById(R.id.toMenu);
@@ -107,13 +112,10 @@ public class ResultMapsActivity extends FragmentActivity implements OnMapReadyCa
         mMap.setMinZoomPreference(14.0f);
         mMap.setMaxZoomPreference(18.0f);
 
-        LocationContentProvider locationProvider = new LocationContentProvider();
         // get data from location provider
-        ArrayList<FenceModel> fences = locationProvider.getLastSessionFences();
         drawFences(fences); // draw GeoFences on map
 
         // get data from location provider
-        ArrayList<TraversalModel> traversals = locationProvider.getTraversals();
         drawTraversals(traversals); // draw Entry & Exit points on map
     }
 

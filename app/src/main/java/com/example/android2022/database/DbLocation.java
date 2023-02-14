@@ -1,6 +1,15 @@
 package com.example.android2022.database;
 
+import android.net.Uri;
+
 public class DbLocation {
+    // defining content URI
+    private static final String URL_F = "content://" + LocationContentProvider.PROVIDER_NAME + "/fences";
+    private static final String URL_T = "content://" + LocationContentProvider.PROVIDER_NAME + "/traversals";
+    // parsing the content URI
+    static public final Uri FENCE_URI = Uri.parse(URL_F);
+    static public final Uri TRAVERSAL_URI = Uri.parse(URL_T);
+
     static public String DB_NAME="LOCATIONS_DB";
     static public String TABLE_FENCE="FENCES";
     static public String TABLE_TRAVERSAL="TRAVERSALS";

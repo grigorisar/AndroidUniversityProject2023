@@ -4,6 +4,8 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
+import android.content.ContentValues;
+import android.content.Intent;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
@@ -11,6 +13,9 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.example.android2022.database.DbLocation;
+import com.example.android2022.database.LocationContentProvider;
+import com.example.android2022.utils.LocationService;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingClient;
@@ -26,6 +31,7 @@ import com.example.android2022.databinding.ActivityMapsBinding;
 import com.google.android.gms.tasks.OnSuccessListener;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
@@ -43,7 +49,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     // Buttons
     private Button startButton;
     private Button cancelButton;
-    private long sessionId;
+    private String sessionId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,6 +94,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         // Long click listener
         //        View mapView = findViewById(R.id.map);
         //        mapView.setOnLongClickListener(new GoogleMap.OnMapLongClickListener());
+        sessionId = "Session"+ (System.currentTimeMillis() / 1000L);
+
+
     }
 
 
@@ -202,27 +211,27 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     // Adding button logic
 //    @SuppressLint("NewApi")
     private void startButtonLogic() {
-        sessionId = System.currentTimeMillis() / 1000L;
-        // add the temp list to geofences list
-        for (LatLng latLng : tempList) {
-            newGeofenceList.add(new Geofence.Builder()
-                .setRequestId(latLng.toString())
-                .setCircularRegion(
-                        latLng.latitude,
-                        latLng.longitude,
-                        GEOFENCE_RADIUS
-                )
-                .setExpirationDuration(Geofence.NEVER_EXPIRE)
-                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER |
-                        Geofence.GEOFENCE_TRANSITION_EXIT)
-                .build());
-        }
 
+        //Save fences
+        if (tempList != null) {
+            LocationContentProvider provider = new LocationContentProvider();
+            for (LatLng v: tempList) {
+                ContentValues values = new ContentValues();
+                values.put(DbLocation.SESSION_ID,sessionId);
+                values.put(DbLocation.LAT_COL,v.latitude);
+                values.put(DbLocation.LON_COL,v.longitude);
+
+                provider.insert(DbLocation.FENCE_URI,values);
+//                tempList.remove(v); // remove it from list
+            }
+        }
+        tempList.clear();// clear fence list
+        startService(new Intent(getApplicationContext(), LocationService.class));
     }
 
     // Remove all newly created geofences
     private void cancelButtonLogic() {
-
+        tempList = null;
         // TODO: check if this performs as it should
         finish();
 //        newGeofenceList.removeAll();

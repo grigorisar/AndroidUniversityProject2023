@@ -1,20 +1,16 @@
 package com.example.android2022.database;
 
-import static android.content.ContentValues.TAG;
-
 import android.annotation.SuppressLint;
 import android.content.ContentProvider;
 import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
-import android.provider.UserDictionary;
 import android.util.Log;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.example.android2022.models.FenceModel;
@@ -27,19 +23,11 @@ public class LocationContentProvider extends ContentProvider {
 
     static final String PROVIDER_NAME = "com.example.android2022.provider";
 
-    // defining content URI
-    static final String URL_F = "content://" + PROVIDER_NAME + "/fences";
-    static final String URL_T = "content://" + PROVIDER_NAME + "/traversals";
-
-    // parsing the content URI
-    static final Uri FENCE_URI = Uri.parse(URL_F);
-    static final Uri TRAVERSAL_URI = Uri.parse(URL_T);
-
     static final String id = "id";
     static final String name = "name";
     static final int uriCodeFence = 1;
     static final int uriCodeTraversal = 2;
-    static UriMatcher uriMatcher;
+    static UriMatcher uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
     static ContentResolver resolver;
     private static HashMap<String, String> values;
     static DbHelper helper;
@@ -48,16 +36,14 @@ public class LocationContentProvider extends ContentProvider {
     static {
         // to match the content URI
         // every time user access table under content provider
-        uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 
         //TODO: customize this for two tables
         // to access whole table
 
         //access table fences
-        uriMatcher.addURI(PROVIDER_NAME, DbLocation.TABLE_FENCE, uriCodeFence);
-
+        uriMatcher.addURI(PROVIDER_NAME, DbLocation.TABLE_FENCE.toLowerCase(), uriCodeFence);
         //access table traversal
-        uriMatcher.addURI(PROVIDER_NAME, DbLocation.TABLE_TRAVERSAL, uriCodeTraversal);
+        uriMatcher.addURI(PROVIDER_NAME, DbLocation.TABLE_TRAVERSAL.toLowerCase(), uriCodeTraversal);
 
         // to access a particular row
         // of the table
@@ -86,7 +72,7 @@ public class LocationContentProvider extends ContentProvider {
         if (sessionId == null) { return null;}
         // select DbLocation.TIMESTAMP_COL from DbLocation.TABLE_FENCE WHERE DbLocation.TIMESTAMP_COL=getLastSession() ;
         ArrayList fences = new ArrayList();
-        Cursor c = query(FENCE_URI,
+        Cursor c = query(DbLocation.FENCE_URI,
                 null,
                 DbLocation.SESSION_ID + " = ?",
                 new String[]{sessionId},
@@ -99,7 +85,7 @@ public class LocationContentProvider extends ContentProvider {
 //                    Double.parseDouble(getValue(cursor,DbLocation.LON_COL)));
             @SuppressLint("Range")
             FenceModel fence = new FenceModel(
-                    c.getString(c.getColumnIndex(DbLocation.TIMESTAMP_COL)),
+                    c.getString(c.getColumnIndex(DbLocation.SESSION_ID)),
                     c.getDouble(c.getColumnIndex(DbLocation.LAT_COL)),
                     c.getDouble(c.getColumnIndex(DbLocation.LON_COL)));
             fences.add(fence);
@@ -109,16 +95,16 @@ public class LocationContentProvider extends ContentProvider {
     }
 
 
-    public ArrayList<TraversalModel> getTraversals() {
+    public ArrayList<TraversalModel> getLastSessionTraversals() {
         ArrayList<TraversalModel> travs = new ArrayList<>();
         String sessionId = getLastSession();
         if (sessionId == null) {
             return null;
         }
         Cursor c = query(
-                TRAVERSAL_URI,
+                DbLocation.TRAVERSAL_URI,
                 null,
-                DbLocation.TIMESTAMP_COL + " = ?",
+                DbLocation.SESSION_ID + " = ?",
                 new String[]{sessionId},
                 null);
         while(c.moveToNext()){
@@ -132,6 +118,7 @@ public class LocationContentProvider extends ContentProvider {
             );
             travs.add(t);
         }
+
         return travs;
     }
 
@@ -144,7 +131,7 @@ public class LocationContentProvider extends ContentProvider {
 //
         try {
             Cursor cursor = query(
-                    FENCE_URI,
+                    DbLocation.FENCE_URI,
                     new String[]{"max("+DbLocation.SESSION_ID+")"},
                     null,
                     null,
@@ -152,7 +139,9 @@ public class LocationContentProvider extends ContentProvider {
                     null);
             if(cursor!= null){
                 cursor.moveToFirst();
-                return  cursor.getString(0);
+                String session = cursor.getString(0);
+                Log.d("SessionID", "getLastSession() returned: " + session);
+                return session;
             }
         }catch (Error e){
             return null;
@@ -178,32 +167,13 @@ public class LocationContentProvider extends ContentProvider {
                         @Nullable String selection,  // WHERE clause
                         @Nullable String[] selectionArgs, // WHERE clause value substitution
                         @Nullable String sortOrder) {
-        Cursor cursor = null;
-        String table= DbLocation.TABLE_FENCE;
-        switch(uriMatcher.match(uri)){
-            //Select * from LOCATIONS
-            case uriCodeFence:
-//                cursor = database.query(uri.getPath(),projection,selection,selectionArgs,null,null,null);
-//                sortOrder = DbLocation.FENCE_ID + " DESC";
-                table = DbLocation.TABLE_FENCE;
-                break; //Select * from LOCATIONS
-            case uriCodeTraversal:
-                table = DbLocation.TABLE_TRAVERSAL;
-//                sortOrder = DbLocation.TIMESTAMP_COL + " DESC";
-//                cursor = database.query(uri.getPath(),projection,selection,selectionArgs,null,null,null);
-                break;
-            default:
-                Log.d(TAG, "UriMatcher:CODE NOT FOUND \nquery() -> returned: " + cursor);
-        }
-//        cursor = database.query(uri.getPath(),projection,selection,selectionArgs,null,null,sortOrder);
         //TODO: check if uri matches table
         try{
-            cursor = database.query(table,projection,selection,selectionArgs,null,null,sortOrder);
+           Cursor cursor = database.query(getType(uri),projection,selection,selectionArgs,null,null,sortOrder);
+           return cursor;
         }catch (Error e){
             return null;
         }
-        //TODO: Add null handling
-        return cursor;
     }
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
@@ -216,23 +186,27 @@ public class LocationContentProvider extends ContentProvider {
     public String getType(Uri uri) {
         // TODO: Implement this to handle requests for the MIME type of the data
         // at the given URI.
-        int match = uriMatcher.match(uri);
-        switch (match)
+        switch (uriMatcher.match(uri))
         {
             case uriCodeFence:
-                return "vnd.android.cursor.dir/";
+                return DbLocation.TABLE_FENCE;
             case uriCodeTraversal:
-                return "vnd.android.cursor.item/person";
+                return DbLocation.TABLE_TRAVERSAL;
             default:
-                return null;
+                throw new UnsupportedOperationException("No table found for URI :" + uri);
         }
     }
 
     @Override
     public Uri insert(Uri uri, ContentValues values) {
-//        Uri insertedItemUri = resolver.insert(uri,values); //may be null
-//        return insertedItemUri;
-        throw new UnsupportedOperationException("Not yet implemented");
+
+        long id = database.insert(getType(uri), null, values);
+        if (id > 0) {
+            Uri _uri = ContentUris.withAppendedId(uri, id);
+            resolver.notifyChange(_uri, null);
+            return _uri;
+        }
+        throw new UnsupportedOperationException("Insertion Failed for URI :" + uri);
     }
 
     @Override

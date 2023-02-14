@@ -14,6 +14,7 @@ import java.util.ArrayList;
 
 public class TraversalModel {
 
+    
     private String sessionId, action, timestamp;
     private double latitude, longitude;
 

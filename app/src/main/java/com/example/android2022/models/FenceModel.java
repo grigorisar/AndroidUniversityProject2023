@@ -6,6 +6,7 @@ import android.database.sqlite.SQLiteDatabase;
 
 import com.example.android2022.database.DbHelper;
 import com.example.android2022.database.DbLocation;
+import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
 
@@ -65,6 +66,9 @@ public class FenceModel {
 //        return ;
 //    }
 
+    public LatLng getLatLng(){
+        return new LatLng(latitude,longitude);
+    }
     public String getSessionId() {
         return sessionId;
     }
