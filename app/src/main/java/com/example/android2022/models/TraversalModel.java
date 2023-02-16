@@ -14,13 +14,16 @@ import java.util.ArrayList;
 
 public class TraversalModel {
 
-    
+    public static final String ENTER = "ENTER";
+    public static final String EXIT = "EXIT";
+    private int fenceId;
     private String sessionId, action, timestamp;
     private double latitude, longitude;
 
     static DbHelper helper;
 
-    public TraversalModel(String sessionId, String action, String timestamp, double latitude, double longitude) {
+    public TraversalModel(String sessionId, String action, String timestamp, double latitude, double longitude,int fenceId) {
+        this.fenceId = fenceId;
         this.sessionId = sessionId;
         this.action = action;
         this.timestamp = timestamp;
@@ -28,8 +31,10 @@ public class TraversalModel {
         this.longitude = longitude;
     }
 
+
     public long persist() throws Exception{
         ContentValues values = new ContentValues();
+        values.put(DbLocation.FENCE_ID, this.fenceId);
         values.put(DbLocation.SESSION_ID, this.sessionId);
         values.put(DbLocation.LAT_COL, this.latitude);
         values.put(DbLocation.LON_COL, this.longitude);
@@ -44,45 +49,45 @@ public class TraversalModel {
         return result;
     }
 
-    public static ArrayList<TraversalModel> getLastTraversals() throws Exception{
-        ArrayList<TraversalModel> latestTraversals = new ArrayList<>();
-
-        String table = DbLocation.TABLE_TRAVERSAL;
-        String[] columns = {
-                DbLocation.SESSION_ID,
-                DbLocation.LAT_COL,
-                DbLocation.LON_COL,
-                DbLocation.TIMESTAMP_COL,
-                DbLocation.ACTION_COL,
-        };
-//        String[] selectionArgs = {sessionId};
-//        String sessionId = getLastSessionId();
-
-        // If a last session is found then select it, otherwise return null
-        String sessionId = fetchLastSessionId();
-        if (sessionId!= null){ //if found
-            SQLiteDatabase db = helper.getReadableDatabase();
-            String[] selectionArgs = new String[]{sessionId};
-            String selection = DbLocation.SESSION_ID+"=?";
-
-            Cursor results = db.query(table, columns, selection, selectionArgs, null, null, null, null);
-
-            if (results.moveToFirst()) {
-                do {
-                    TraversalModel traversal= new TraversalModel(
-                            results.getString(1),
-                            results.getString(2),
-                            results.getString(3),
-                            results.getDouble(4),
-                            results.getDouble(5));
-                    latestTraversals.add(traversal);
-                } while (results.moveToNext());
-            }
-            db.close();
-            return latestTraversals;
-        }
-        return null;
-    }
+//    public static ArrayList<TraversalModel> getLastTraversals() throws Exception{
+//        ArrayList<TraversalModel> latestTraversals = new ArrayList<>();
+//
+//        String table = DbLocation.TABLE_TRAVERSAL;
+//        String[] columns = {
+//                DbLocation.SESSION_ID,
+//                DbLocation.LAT_COL,
+//                DbLocation.LON_COL,
+//                DbLocation.TIMESTAMP_COL,
+//                DbLocation.ACTION_COL,
+//        };
+////        String[] selectionArgs = {sessionId};
+////        String sessionId = getLastSessionId();
+//
+//        // If a last session is found then select it, otherwise return null
+//        String sessionId = fetchLastSessionId();
+//        if (sessionId!= null){ //if found
+//            SQLiteDatabase db = helper.getReadableDatabase();
+//            String[] selectionArgs = new String[]{sessionId};
+//            String selection = DbLocation.SESSION_ID+"=?";
+//
+//            Cursor results = db.query(table, columns, selection, selectionArgs, null, null, null, null);
+//
+//            if (results.moveToFirst()) {
+//                do {
+//                    TraversalModel traversal= new TraversalModel(
+//                            results.getString(1),
+//                            results.getString(2),
+//                            results.getString(3),
+//                            results.getDouble(4),
+//                            results.getDouble(5));
+//                    latestTraversals.add(traversal);
+//                } while (results.moveToNext());
+//            }
+//            db.close();
+//            return latestTraversals;
+//        }
+//        return null;
+//    }
 
     @Nullable
     private static String fetchLastSessionId() throws Exception{
@@ -146,4 +151,13 @@ public class TraversalModel {
     public void setTimestamp(String timestamp) {
         this.timestamp = timestamp;
     }
+
+    public int getFenceId() {
+        return fenceId;
+    }
+
+    public void setFenceId(int fenceId) {
+        this.fenceId = fenceId;
+    }
 }
+

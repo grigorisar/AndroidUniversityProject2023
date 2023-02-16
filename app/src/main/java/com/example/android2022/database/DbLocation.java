@@ -50,5 +50,6 @@ public class DbLocation {
             + LAT_COL +" TEXT,"
             + LON_COL +" TEXT,"
             + TIMESTAMP_COL +" TEXT,"
-            + ACTION_COL +" TEXT);";
+            + ACTION_COL +" TEXT,"
+            + FENCE_ID + " INTEGER);";
 }

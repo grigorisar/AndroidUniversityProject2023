@@ -51,7 +51,7 @@ public class ResultMapsActivity extends FragmentActivity implements OnMapReadyCa
         provider = new LocationContentProvider();
         fences = provider.getLastSessionFences();
         traversals = provider.getLastSessionTraversals();
-        Log.i("Traversals", "Traversal matches fence SessionID "+ traversals.get(0).getSessionId().equals(fences.get(0).getSessionId()));
+//        Log.i("Traversals", "Traversal matches fence SessionID "+ traversals.get(0).getSessionId().equals(fences.get(0).getSessionId()));
 
         // Button Logic
         returnButton = findViewById(R.id.toMenu);

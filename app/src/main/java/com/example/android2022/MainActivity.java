@@ -36,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
         storageButton = findViewById(R.id.storage);
         locationButton = findViewById(R.id.location);
         areaCreationButton = findViewById(R.id.area_creation);
-
+        checkPermissions();
         // Set Buttons on Click Listeners
         locationButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -66,6 +66,14 @@ public class MainActivity extends AppCompatActivity {
                 checkPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, WRITE_STORAGE_PERMISSION_CODE);
             }
         });
+    }
+
+    public int checkPermissions() {
+        checkPermission(Manifest.permission.READ_EXTERNAL_STORAGE, READ_STORAGE_PERMISSION_CODE);
+        checkPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, WRITE_STORAGE_PERMISSION_CODE);
+        checkPermission(Manifest.permission.ACCESS_FINE_LOCATION, FINE_LOCATION_PERMISSION_CODE);
+        checkPermission(Manifest.permission.ACCESS_BACKGROUND_LOCATION, BACKGROUND_LOCATION_PERMISSION_CODE);
+    return 0;
     }
 
     // Function to check and request permission.

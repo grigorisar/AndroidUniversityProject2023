@@ -4,11 +4,14 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.content.ContentValues;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
@@ -44,7 +47,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private int GEOFENCE_RADIUS = 100;
     private GeofencingClient geofencingClient;
     private List<LatLng> tempList = new ArrayList<LatLng>();
-    private ArrayList newGeofenceList = new ArrayList();
 
     // Buttons
     private Button startButton;
@@ -213,7 +215,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private void startButtonLogic() {
 
         //Save fences
-        if (tempList != null) {
+        if (!tempList.isEmpty()) {
             LocationContentProvider provider = new LocationContentProvider();
             for (LatLng v: tempList) {
                 ContentValues values = new ContentValues();
@@ -223,10 +225,22 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                 provider.insert(DbLocation.FENCE_URI,values);
 //                tempList.remove(v); // remove it from list
+                tempList.clear();// clear fence list
+                startService(new Intent(getApplicationContext(), LocationService.class));
+
             }
+        }else{
+            Log.i("No fences created", "startButtonLogic: ");
+            AlertDialog alertDialog = new AlertDialog.Builder(MapsActivity.this).create();
+            alertDialog.setTitle("Please select area(s).");
+            alertDialog.setMessage("Start recording your location by long pressing on the map!");
+            alertDialog.setButton("Ok", (dialog, which) -> {
+                // If user click no then dialog box is canceled.
+                dialog.cancel();
+            });
+            alertDialog.show();
+            Toast.makeText(this, "Failed to start: No fences created.", Toast.LENGTH_SHORT).show();
         }
-        tempList.clear();// clear fence list
-        startService(new Intent(getApplicationContext(), LocationService.class));
     }
 
     // Remove all newly created geofences

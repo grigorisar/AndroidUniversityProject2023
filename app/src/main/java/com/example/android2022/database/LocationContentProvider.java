@@ -50,20 +50,6 @@ public class LocationContentProvider extends ContentProvider {
 //        uriMatcher.addURI(PROVIDER_NAME, "users/*", uriCode);
     }
 
-//    @Nullable
-//    @Override
-//    public Cursor query(@NonNull Uri uri, @Nullable String[] projection, @Nullable String selectionClause, @Nullable String[] selectionArgs, @Nullable String groupBy, @Nullable String having, @Nullable String orderBy) {
-//        SQLiteDatabase database = helper.getReadableDatabase();
-//        Cursor cursor = null;
-//        switch(uriMatcher.match(uri)){
-//            //Select * from LOCATIONS
-//            case 1:
-//                cursor = database.query(DbLocation.TABLE_NAME,projection,selectionClause,selectionArgs,groupBy,having,orderBy);
-//                break;
-//        }
-//        return cursor;
-//    }
-
     public ArrayList getLastSessionFences(){
 
         //TODO: Implement this to get the geofences of the last session
@@ -85,6 +71,7 @@ public class LocationContentProvider extends ContentProvider {
 //                    Double.parseDouble(getValue(cursor,DbLocation.LON_COL)));
             @SuppressLint("Range")
             FenceModel fence = new FenceModel(
+                    c.getInt(c.getColumnIndex(DbLocation.FENCE_ID)),
                     c.getString(c.getColumnIndex(DbLocation.SESSION_ID)),
                     c.getDouble(c.getColumnIndex(DbLocation.LAT_COL)),
                     c.getDouble(c.getColumnIndex(DbLocation.LON_COL)));
@@ -114,7 +101,8 @@ public class LocationContentProvider extends ContentProvider {
                     c.getString(c.getColumnIndex(DbLocation.ACTION_COL)),
                     c.getString(c.getColumnIndex(DbLocation.TIMESTAMP_COL)),
                     c.getDouble(c.getColumnIndex((DbLocation.LAT_COL))),
-                    c.getDouble(c.getColumnIndex((DbLocation.LON_COL)))
+                    c.getDouble(c.getColumnIndex((DbLocation.LON_COL))),
+                    c.getInt(c.getColumnIndex((DbLocation.FENCE_ID)))
             );
             travs.add(t);
         }
@@ -206,7 +194,8 @@ public class LocationContentProvider extends ContentProvider {
             resolver.notifyChange(_uri, null);
             return _uri;
         }
-        throw new UnsupportedOperationException("Insertion Failed for URI :" + uri);
+//        throw new UnsupportedOperationException("Insertion Failed for URI :" + uri);
+        return uri;
     }
 
     @Override

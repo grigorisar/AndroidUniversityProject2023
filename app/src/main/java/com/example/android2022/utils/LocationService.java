@@ -20,12 +20,7 @@ import androidx.core.app.ActivityCompat;
 import com.example.android2022.database.DbLocation;
 import com.example.android2022.database.LocationContentProvider;
 import com.example.android2022.models.FenceModel;
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.Geofence;
-import com.google.android.gms.location.GeofencingClient;
-import com.google.android.gms.location.LocationCallback;
-import com.google.android.gms.location.LocationResult;
-import com.google.android.gms.location.LocationServices;
+import com.example.android2022.models.TraversalModel;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
@@ -38,7 +33,7 @@ public class LocationService extends Service {
     public MyLocationListener listener;
     private ArrayList<FenceModel> fences;
     LocationContentProvider provider;
-
+    private int lastFenceId;
     static String travFlag = "ENTRY";
 
 
@@ -157,14 +152,24 @@ public class LocationService extends Service {
             //TODO: add criteria
             LatLng location = new LatLng(loc.getLatitude(),loc.getLongitude());
 
-            for (FenceModel fence: fences) {
-                double distanceFromCircle = calculateDistance(location,fence.getLatLng());
-                String sessionId = fence.getSessionId();
 
+            for (FenceModel fence: fences) {
+                String sessionId = fence.getSessionId();
+                double distanceFromCircle = calculateDistance(location,fence.getLatLng());
+                //if the last traversal fence equals to this one
+                if(fence.getId()==lastFenceId){
+                    // continue if user is still in circle
+                    if(distanceFromCircle<100){
+                        continue;
+                    }else{ // otherwise user exited the circle
+                        patchTraversal(location,sessionId,TraversalModel.EXIT,fence.getId());
+                    }
+                }
                 if (distanceFromCircle < 100){
                     Log.i("Location Update", "Fence Session ID: "+ sessionId);
                     Log.i("Location Update", "Distance from circle: "+ distanceFromCircle);
-                   patchTraversal(location, sessionId);
+                    patchTraversal(location, sessionId, TraversalModel.ENTER,fence.getId());
+                    lastFenceId = fence.getId();
 //                    Log.i("Inserted Traversal", "onLocationChanged: " + location.longitude+ "\n"+ location.latitude);
                 }
             }
@@ -173,13 +178,14 @@ public class LocationService extends Service {
 //                sendBroadcast(intent);
         }
 
-        public void patchTraversal(LatLng location,String sessionId){
+        public void patchTraversal(LatLng location,String sessionId,String action,int fenceId){
             ContentValues values = new ContentValues();
             values.put(DbLocation.LAT_COL,location.latitude);
             values.put(DbLocation.LON_COL,location.longitude);
             values.put(DbLocation.SESSION_ID,sessionId);
-            values.put(DbLocation.ACTION_COL, travFlag);
+            values.put(DbLocation.ACTION_COL, action);
             values.put(DbLocation.TIMESTAMP_COL,String.valueOf(System.currentTimeMillis() / 1000L));
+            values.put(DbLocation.FENCE_ID,fenceId);
 
             provider.insert(DbLocation.TRAVERSAL_URI,values);
         }

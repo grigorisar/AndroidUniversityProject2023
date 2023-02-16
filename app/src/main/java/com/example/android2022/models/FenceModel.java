@@ -12,9 +12,17 @@ import java.util.ArrayList;
 
 public class FenceModel {
     // radius of 100 but we don't need to save that because we don't use it
+    private int id;
     private String sessionId;
     private double latitude,longitude;
     static DbHelper helper;
+
+    public FenceModel(int id, String sessionId, double latitude, double longitude) {
+        this.id = id;
+        this.sessionId = sessionId;
+        this.latitude = latitude;
+        this.longitude = longitude;
+    }
 
     public FenceModel(String sessionId, double latitude, double longitude) {
         this.sessionId = sessionId;
@@ -61,11 +69,6 @@ public class FenceModel {
         return fences;
     }
 
-    //TODO: Retrieve function
-//    public static ArrayList<FenceModel> getSessionFences(){
-//        return ;
-//    }
-
     public LatLng getLatLng(){
         return new LatLng(latitude,longitude);
     }
@@ -89,7 +92,16 @@ public class FenceModel {
         return longitude;
     }
 
+
     public void setLongitude(double longitude) {
         this.longitude = longitude;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 }
