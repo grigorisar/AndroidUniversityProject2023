@@ -1,5 +1,6 @@
 package com.example.android2022;
 
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentActivity;
 
@@ -26,7 +27,7 @@ import com.example.android2022.databinding.ActivityResultMapsBinding;
 
 import java.util.ArrayList;
 
-public class ResultMapsActivity extends FragmentActivity implements OnMapReadyCallback {
+public class ResultMapsActivity extends AppCompatActivity implements OnMapReadyCallback {
     private int GEOFENCE_RADIUS = 100;
     private GoogleMap mMap;
     private ActivityResultMapsBinding binding;

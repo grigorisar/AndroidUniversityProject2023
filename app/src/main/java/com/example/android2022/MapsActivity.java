@@ -2,6 +2,7 @@ package com.example.android2022;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.FragmentActivity;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
@@ -225,15 +226,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                 provider.insert(DbLocation.FENCE_URI,values);
 //                tempList.remove(v); // remove it from list
-                tempList.clear();// clear fence list
-                startService(new Intent(getApplicationContext(), LocationService.class));
-
             }
+            tempList.clear();// clear fence list
+            startService(new Intent(getApplicationContext(), LocationService.class));
         }else{
             Log.i("No fences created", "startButtonLogic: ");
             AlertDialog alertDialog = new AlertDialog.Builder(MapsActivity.this).create();
-            alertDialog.setTitle("Please select area(s).");
-            alertDialog.setMessage("Start recording your location by long pressing on the map!");
+            alertDialog.setTitle("No fences created");
+            alertDialog.setMessage("Long press on the map to add a new area!");
             alertDialog.setButton("Ok", (dialog, which) -> {
                 // If user click no then dialog box is canceled.
                 dialog.cancel();
