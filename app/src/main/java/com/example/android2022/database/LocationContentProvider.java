@@ -23,36 +23,23 @@ public class LocationContentProvider extends ContentProvider {
 
     static final String PROVIDER_NAME = "com.example.android2022.provider";
 
-    static final String id = "id";
-    static final String name = "name";
     static final int uriCodeFence = 1;
     static final int uriCodeTraversal = 2;
     static UriMatcher uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
     static ContentResolver resolver;
-    private static HashMap<String, String> values;
     static DbHelper helper;
     static SQLiteDatabase database;
 
     static {
-        // to match the content URI
-        // every time user access table under content provider
-
-        //TODO: customize this for two tables
-        // to access whole table
 
         //access table fences
         uriMatcher.addURI(PROVIDER_NAME, DbLocation.TABLE_FENCE.toLowerCase(), uriCodeFence);
         //access table traversal
         uriMatcher.addURI(PROVIDER_NAME, DbLocation.TABLE_TRAVERSAL.toLowerCase(), uriCodeTraversal);
 
-        // to access a particular row
-        // of the table
-//        uriMatcher.addURI(PROVIDER_NAME, "users/*", uriCode);
     }
 
     public ArrayList getLastSessionFences(){
-
-        //TODO: Implement this to get the geofences of the last session
 
         String sessionId = getLastSession();
         if (sessionId == null) { return null;}
@@ -65,10 +52,6 @@ public class LocationContentProvider extends ContentProvider {
                 null);
 
         while(c.moveToNext()){
-//            FenceModel fence = new FenceModel(cursor.getString(
-//                    getValue(cursor,DbLocation.TIMESTAMP_COL),
-//                    Double.parseDouble(getValue(cursor,DbLocation.LAT_COL)),
-//                    Double.parseDouble(getValue(cursor,DbLocation.LON_COL)));
             @SuppressLint("Range")
             FenceModel fence = new FenceModel(
                     c.getInt(c.getColumnIndex(DbLocation.FENCE_ID)),
@@ -111,12 +94,6 @@ public class LocationContentProvider extends ContentProvider {
     }
 
     private String getLastSession(){
-//        SELECT max(DbLocation.TIMESTAMP_COL) FROM DbLocation.TABLE_FENCE
-//        selectionClause = UserDictionary.Words.WORD + " = ?";
-//
-//        // Moves the user's input string to the selection arguments.
-//        selectionArgs[0] = searchString;
-//
         try {
             Cursor cursor = query(
                     DbLocation.FENCE_URI,
@@ -165,15 +142,12 @@ public class LocationContentProvider extends ContentProvider {
     }
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
-//        resolver.delete(uri,selection,selectionArgs);
         // Implement this to handle requests to delete one or more rows.
         throw new UnsupportedOperationException("Not yet implemented");
     }
 
     @Override
     public String getType(Uri uri) {
-        // TODO: Implement this to handle requests for the MIME type of the data
-        // at the given URI.
         switch (uriMatcher.match(uri))
         {
             case uriCodeFence:
@@ -194,15 +168,12 @@ public class LocationContentProvider extends ContentProvider {
             resolver.notifyChange(_uri, null);
             return _uri;
         }
-//        throw new UnsupportedOperationException("Insertion Failed for URI :" + uri);
         return uri;
     }
 
     @Override
     public int update(Uri uri, ContentValues values, String selection,
                       String[] selectionArgs) {
-//        int rowsAffected = resolver.update(uri,values,selection,selectionArgs);
-//        return rowsAffected;
         throw new UnsupportedOperationException("Not yet implemented");
     }
 

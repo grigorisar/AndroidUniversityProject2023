@@ -26,7 +26,6 @@ import com.google.android.gms.maps.model.LatLng;
 import java.util.ArrayList;
 
 public class LocationService extends Service {
-    public static final String BROADCAST_ACTION = "Observing Location :)";
     private static final int minTime = 1000 * 5;// in millis
     private static final int minDistance = 50; // in meters
     public LocationManager locationManager;
@@ -34,14 +33,6 @@ public class LocationService extends Service {
     private ArrayList<FenceModel> fences;
     LocationContentProvider provider;
     private int lastFenceId;
-    static String travFlag = "ENTRY";
-
-
-    //    private GeofencingClient geofencingClient;
-//    private ArrayList geofenceList;
-//    Intent intent;
-//    private FusedLocationProviderClient mFusedLocationClient;
-//    public Location previousBestLocation = null;
 
 
     @Override
@@ -51,13 +42,6 @@ public class LocationService extends Service {
         listener = new MyLocationListener();
 //        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, minTime, minDistance , (LocationListener) listener);
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
             return;
         }
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, minTime, minDistance, listener);
@@ -80,34 +64,8 @@ public class LocationService extends Service {
         return START_STICKY;
     }
 
-//    @Override
-//    public void onTaskRemoved(Intent rootIntent){
-//        Intent restartServiceIntent = new Intent(getApplicationContext(),this.getClass());
-//        restartServiceIntent.setPackage(getPackageName());
-//        startService(restartServiceIntent);
-//        super.onTaskRemoved(rootIntent);
-//    }
-//
-//    private LocationCallback locationCallback = new LocationCallback() {
-//        @Override
-//        public void onLocationResult(LocationResult locationResult) {
-//            super.onLocationResult(locationResult);
-//            Location currentLocation = locationResult.getLastLocation();
-//
-//
-//            Log.d("Locations", currentLocation.getLatitude() +"," +currentLocation.getLongitude());
-//            //ToDO Publish Location
-//        }
-//    };
-
-//    private void startLocationUpdates() {
-//        mFusedLocationClient.requestLocationUpdates(locationRequest,
-//                locationCallback,
-//                Looper.getMainLooper());
-//    }
     @Override
     public void onDestroy() {
-        // handler.removeCallbacks(sendUpdatesToUI);
         super.onDestroy();
         Log.v("STOP_SERVICE", "DONE");
         locationManager.removeUpdates(listener);

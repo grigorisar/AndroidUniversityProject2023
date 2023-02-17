@@ -85,12 +85,11 @@ public class MainActivity extends AppCompatActivity {
 
             // Requesting the permission
             ActivityCompat.requestPermissions(MainActivity.this, new String[] { permission }, requestCode);
-            return;
         }
         else {
             Toast.makeText(MainActivity.this, "Permission already granted", Toast.LENGTH_SHORT).show();
-            return;
         }
+        return;
     }
 
     // This function is called when the user accepts or decline the permission.
@@ -122,9 +121,7 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(MainActivity.this, "Fine Location Denied", Toast.LENGTH_SHORT) .show();
 //                checkPermission(Manifest.permission.ACCESS_FINE_LOCATION, FINE_LOCATION_PERMISSION_CODE);
             }
-        }
-
-        if (requestCode == WRITE_STORAGE_PERMISSION_CODE) {
+        }else if (requestCode == WRITE_STORAGE_PERMISSION_CODE) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 Toast.makeText(MainActivity.this, "Write Permission Granted", Toast.LENGTH_SHORT) .show();
             }

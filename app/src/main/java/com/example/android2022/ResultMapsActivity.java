@@ -199,7 +199,6 @@ public class ResultMapsActivity extends AppCompatActivity implements OnMapReadyC
         // Radius of the circle
         circleOptions.radius(8);
 
-//        FenceModel rootFence = fences.stream().filter(fence -> fenceId == fence.getId()).findFirst().orElse(null);
         switch (mode){
             case "ENTER":
                 // Border color of the circle
@@ -220,7 +219,6 @@ public class ResultMapsActivity extends AppCompatActivity implements OnMapReadyC
                 circleOptions.fillColor(Color.BLACK);
                 break;
         }
-//        drawClosestLine(rootFence,point);
 
         // Border width of the circle
         circleOptions.strokeWidth(1);
@@ -228,21 +226,6 @@ public class ResultMapsActivity extends AppCompatActivity implements OnMapReadyC
         // Adding the circle to the GoogleMap
         mMap.addCircle(circleOptions);
     }
-//    private void drawClosestLine(FenceModel fence, LatLng trav){
-//        if (fence == null) {
-//            Log.i("___________", "drawClosestLine: Did not find fence with id"+fence.getId());
-//            return;
-//        }
-//        LatLng c = new LatLng(fence.getLatitude(),fence.getLongitude());
-//        int R = GEOFENCE_RADIUS;
-//        double vX = trav.latitude - c.latitude;
-//        double vY = trav.longitude - c.longitude;
-//        double magV = sqrt(vX*vX + vY*vY);
-//        double aX = c.latitude + vX / magV * R;
-//        double aY = c.longitude + vY / magV * R;
-//        mMap.addPolyline(new PolylineOptions()
-//                .clickable(true)
-//                .add(trav,new LatLng(aX,aY)));
-//
-//    }
+
+
 }
