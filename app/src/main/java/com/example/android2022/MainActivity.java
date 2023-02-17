@@ -13,6 +13,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import com.example.android2022.utils.LocationService;
+
 public class MainActivity extends AppCompatActivity {
 
     // Defining Buttons
@@ -33,6 +35,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
         storageButton = findViewById(R.id.storage);
         locationButton = findViewById(R.id.location);
         areaCreationButton = findViewById(R.id.area_creation);
@@ -41,8 +44,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v)
             {
-                checkPermission(Manifest.permission.ACCESS_FINE_LOCATION, FINE_LOCATION_PERMISSION_CODE);
                 startActivity(new Intent(MainActivity.this,ResultMapsActivity.class));
+
+                checkPermission(Manifest.permission.ACCESS_FINE_LOCATION, FINE_LOCATION_PERMISSION_CODE);
             }
         });
 
@@ -50,9 +54,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v)
             {
+                startActivity(new Intent(MainActivity.this,MapsActivity.class));
                 checkPermission(Manifest.permission.ACCESS_FINE_LOCATION, FINE_LOCATION_PERMISSION_CODE);
                 checkPermission(Manifest.permission.ACCESS_BACKGROUND_LOCATION, BACKGROUND_LOCATION_PERMISSION_CODE);
-                startActivity(new Intent(MainActivity.this,MapsActivity.class));
             }
         });
 
@@ -63,8 +67,15 @@ public class MainActivity extends AppCompatActivity {
             {
                 checkPermission(Manifest.permission.READ_EXTERNAL_STORAGE, READ_STORAGE_PERMISSION_CODE);
                 checkPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, WRITE_STORAGE_PERMISSION_CODE);
+                stopService(new Intent(getBaseContext(), LocationService.class));
             }
         });
+        checkPermission(Manifest.permission.ACCESS_FINE_LOCATION, FINE_LOCATION_PERMISSION_CODE);
+        checkPermission(Manifest.permission.ACCESS_BACKGROUND_LOCATION, BACKGROUND_LOCATION_PERMISSION_CODE);
+        checkPermission(Manifest.permission.READ_EXTERNAL_STORAGE, READ_STORAGE_PERMISSION_CODE);
+        checkPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, WRITE_STORAGE_PERMISSION_CODE);
+
+
     }
 
     // Function to check and request permission.

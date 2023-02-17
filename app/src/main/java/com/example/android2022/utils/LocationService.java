@@ -162,12 +162,13 @@ public class LocationService extends Service {
                     if(distanceFromCircle<100){
                         continue;
                     }else{ // otherwise user exited the circle
+                        Log.i("Exiting Fence", "Fence ID: "+ fence.getId());
                         patchTraversal(location,sessionId,TraversalModel.EXIT,fence.getId());
+                        lastFenceId=-999;
                     }
                 }
                 if (distanceFromCircle < 100){
-                    Log.i("Location Update", "Fence Session ID: "+ sessionId);
-                    Log.i("Location Update", "Distance from circle: "+ distanceFromCircle);
+                    Log.i("Entered Fence", "Fence ID: "+ fence.getId());
                     patchTraversal(location, sessionId, TraversalModel.ENTER,fence.getId());
                     lastFenceId = fence.getId();
 //                    Log.i("Inserted Traversal", "onLocationChanged: " + location.longitude+ "\n"+ location.latitude);
